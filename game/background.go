@@ -1,7 +1,7 @@
 package game
 
 import (
-	"game/assets"
+	"dynegame/assets"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

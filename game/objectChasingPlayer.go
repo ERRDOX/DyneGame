@@ -5,7 +5,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"game/assets"
+	"dynegame/assets"
 )
 
 const (

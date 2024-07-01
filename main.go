@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"game/game"
+	"dynegame/game"
 )
 
 func main() {
