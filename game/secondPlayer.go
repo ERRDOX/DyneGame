@@ -1,26 +1,24 @@
-//go:build ignore
-// +build ignore
-
 package game
 
 import (
+	"fmt"
 	"math"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"dynegame/assets"
 )
 
-const (
-	shootCooldown     = time.Millisecond * 400
-	rotationPerSecond = 1.1 * math.Pi
+// const (
+// shootCooldownPlayer2 = time.Millisecond * 400
 
-	bulletSpawnOffset = 1.0
-	sprintSpeed       = 4
-)
+// 	rotationPerSecond = 1.1 * math.Pi
 
-type Player struct {
+// bulletSpawnOffset = 1.0
+// sprintSpeed       = 4
+// )
+
+type SecondPlayer struct {
 	game *Game
 
 	position Vector
@@ -33,7 +31,7 @@ type Player struct {
 	shootCooldown       *Timer
 }
 
-func NewPlayer(game *Game) *Player {
+func NewSecondPlayer(game *Game) *SecondPlayer {
 	sprite := assets.PlanePlayer
 
 	bounds := sprite[1].Bounds()
@@ -45,10 +43,10 @@ func NewPlayer(game *Game) *Player {
 		Y: screenHeight - 4*halfH,
 	}
 
-	return &Player{
+	return &SecondPlayer{
 		game:           game,
 		position:       pos,
-		rotation:       0,
+		rotation:       180,
 		sprite:         sprite,
 		animationSpeed: 0.1,
 		animationTimer: 0,
@@ -57,53 +55,48 @@ func NewPlayer(game *Game) *Player {
 }
 
 // Update updates the player's position, rotation
-func (p *Player) Update(g *Game) {
-	// p.animationTimer += 1.2 / float64(ebiten.TPS())
-	// println(p.animationTimer, "animation speed : ", p.animationSpeed)
-	// if p.animationTimer >= p.animationSpeed {
-	// 	p.animationTimer = 0
-
-	// 	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyD) {
-	// 		p.playerFramePosition = (p.playerFramePosition + 1) % len(p.sprite)
-	// 	}
-	// }
+func (p *SecondPlayer) Update(g *Game) {
 
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+	actionSnapshot := g.Action.GetAct()
+
+	fmt.Println("action", actionSnapshot)
+
+	if actionSnapshot == "39" {
 		p.rotation -= rotateSpeed
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+	if actionSnapshot == "37" {
 		p.rotation += rotateSpeed
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
+	if actionSnapshot == "d" {
 		p.position.X -= sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.X += sprintSpeed
 		}
 
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyD) {
+	if actionSnapshot == "a" {
 		p.position.X += sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.X -= sprintSpeed
 		}
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
+	if actionSnapshot == "s" {
 		p.position.Y -= sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.Y += sprintSpeed
 		}
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyS) {
+	if actionSnapshot == "w" {
 		p.position.Y += sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.Y -= sprintSpeed
 		}
 	}
 	p.shootCooldown.Update()
-	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
+	if p.shootCooldown.IsReady() && actionSnapshot == "32" {
 		p.shootCooldown.Reset()
 
 		bounds := p.sprite[1].Bounds()
@@ -126,7 +119,7 @@ func (p *Player) Update(g *Game) {
 // to calculate the appropriate drawing options. The function then draws the
 // sprite onto the screen using these options.
 
-func (p *Player) Draw(screen *ebiten.Image) {
+func (p *SecondPlayer) Draw(screen *ebiten.Image) {
 	bounds := p.sprite[0].Bounds()
 	halfW := float64(bounds.Dx()) / 2
 	halfH := float64(bounds.Dy()) / 2
@@ -147,7 +140,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 //
 // It does not take any parameters.
 // It returns a Rect.
-func (p *Player) Collider(BoundsDecreaseRatio float64) Rect {
+func (p *SecondPlayer) Collider(BoundsDecreaseRatio float64) Rect {
 	bounds := p.sprite[p.playerFramePosition].Bounds()
 
 	return NewRect(
@@ -165,7 +158,7 @@ func (p *Player) Collider(BoundsDecreaseRatio float64) Rect {
 //
 // Returns:
 // - A boolean value indicating whether a collision occurred or not.
-func (p *Player) playerObstacleCollisions(g *Game) bool {
+func (p *SecondPlayer) playerObstacleCollisions(g *Game) bool {
 	for _, m := range g.obstacle {
 		if m.Collider().Intersects(p.Collider(humanBoundsDecreaseRatio)) {
 			return true
@@ -179,7 +172,7 @@ func (p *Player) playerObstacleCollisions(g *Game) bool {
 //
 // It takes no parameters.
 // Returns a boolean value indicating whether there is a collision or not.
-func (p *Player) peripheralCollision() bool {
+func (p *SecondPlayer) peripheralCollision() bool {
 	bounds := p.sprite[0].Bounds()
 	halfW := float64(bounds.Dx())
 	halfH := float64(bounds.Dy())

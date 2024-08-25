@@ -18,8 +18,7 @@ const (
 )
 
 type Player struct {
-	game   *Game
-	action string
+	game *Game
 
 	position Vector
 	rotation float64
@@ -116,7 +115,7 @@ func (p *Player) Update(g *Game) {
 		bullet := NewBullet(spawnPos, p.rotation)
 		p.game.AddBullet(bullet)
 	}
-	p.action = ""
+
 }
 
 // Draw renders the player sprite onto the screen.
