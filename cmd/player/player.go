@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -10,7 +11,9 @@ import (
 )
 
 func main() {
-	conn, err := net.Dial("tcp", "localhost:8080")
+	port := flag.String("port", "8080", "Port to connect to")
+	flag.Parse()
+	conn, err := net.Dial("tcp", "localhost:"+*port)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -35,13 +38,13 @@ func main() {
 			var keyString string
 			switch key {
 			case keyboard.KeyArrowUp:
-				keyString = "38"
+				keyString = "ArrowUp"
 			case keyboard.KeyArrowDown:
-				keyString = "40"
+				keyString = "ArrowDown"
 			case keyboard.KeyArrowLeft:
-				keyString = "37"
+				keyString = "ArrowLeft"
 			case keyboard.KeyArrowRight:
-				keyString = "39"
+				keyString = "ArrowRight"
 			default:
 				keyString = fmt.Sprintf("%v", key)
 			}

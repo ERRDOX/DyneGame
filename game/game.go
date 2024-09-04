@@ -43,9 +43,9 @@ type Game struct {
 
 func NewGame() *Game {
 	g := &Game{
-		meteorSpawnTimer: NewTimer(meteorSpawnTime),
-		baseVelocity:     baseMeteorVelocity,
-		velocityTimer:    NewTimer(meteorSpeedUpTime),
+		// meteorSpawnTimer: NewTimer(meteorSpawnTime),
+		baseVelocity:  baseMeteorVelocity,
+		velocityTimer: NewTimer(meteorSpeedUpTime),
 	}
 
 	g.obstacle = append(g.obstacle, NewMaptoObstacle(Map10)...)
@@ -69,17 +69,17 @@ func (g *Game) Update() error {
 	g.SecondPlayer.Update(g)
 	g.player.Update(g)
 
-	g.meteorSpawnTimer.Update()
-	if g.meteorSpawnTimer.IsReady() {
-		g.meteorSpawnTimer.Reset()
+	// g.meteorSpawnTimer.Update()
+	// if g.meteorSpawnTimer.IsReady() {
+	// 	g.meteorSpawnTimer.Reset()
 
-		m := NewMeteor(g.baseVelocity, g.player)
-		g.meteors = append(g.meteors, m)
-	}
+	// 	m := NewMeteor(g.baseVelocity, g.player)
+	// 	g.meteors = append(g.meteors, m)
+	// }
 
-	for _, m := range g.meteors {
-		m.Update()
-	}
+	// for _, m := range g.meteors {
+	// 	m.Update()
+	// }
 
 	for _, b := range g.bullets {
 		b.Update()
@@ -95,16 +95,16 @@ func (g *Game) Update() error {
 		}
 	}
 	go bulletOutofScreen()
-	meteorOutofScreen := func() {
-		for i, m := range g.meteors {
-			if 0 > m.position.X || m.position.X > screenHeight || 0 > m.position.Y || m.position.Y > screenWidth {
-				// println("METEOR X: ", g.meteors[i].position.X)
-				// println("METEOR Y: ", g.meteors[i].position.Y)
-				g.meteors = append(g.meteors[:i], g.meteors[i+1:]...)
-			}
-		}
-	}
-	go meteorOutofScreen()
+	// meteorOutofScreen := func() {
+	// 	for i, m := range g.meteors {
+	// 		if 0 > m.position.X || m.position.X > screenHeight || 0 > m.position.Y || m.position.Y > screenWidth {
+	// 			// println("METEOR X: ", g.meteors[i].position.X)
+	// 			// println("METEOR Y: ", g.meteors[i].position.Y)
+	// 			g.meteors = append(g.meteors[:i], g.meteors[i+1:]...)
+	// 		}
+	// 	}
+	// }
+	// go meteorOutofScreen()
 	// Check for bullet collisions
 	bulletObjectCollisions := func() {
 		for i, m := range g.meteors {

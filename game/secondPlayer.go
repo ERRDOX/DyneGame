@@ -48,7 +48,7 @@ func NewSecondPlayer(game *Game) *SecondPlayer {
 		position:       pos,
 		rotation:       180,
 		sprite:         sprite,
-		animationSpeed: 0.1,
+		animationSpeed: 0.2,
 		animationTimer: 0,
 		shootCooldown:  NewTimer(shootCooldown),
 	}
@@ -60,13 +60,14 @@ func (p *SecondPlayer) Update(g *Game) {
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
 	actionSnapshot := g.Action.GetAct()
+	g.Action.SetAct("")
 
 	fmt.Println("action", actionSnapshot)
 
-	if actionSnapshot == "39" {
+	if actionSnapshot == "ArrowRight" {
 		p.rotation -= rotateSpeed
 	}
-	if actionSnapshot == "37" {
+	if actionSnapshot == "ArrowLeft" {
 		p.rotation += rotateSpeed
 	}
 	if actionSnapshot == "d" {
@@ -96,7 +97,7 @@ func (p *SecondPlayer) Update(g *Game) {
 		}
 	}
 	p.shootCooldown.Update()
-	if p.shootCooldown.IsReady() && actionSnapshot == "32" {
+	if p.shootCooldown.IsReady() && actionSnapshot == "Space" {
 		p.shootCooldown.Reset()
 
 		bounds := p.sprite[1].Bounds()
@@ -111,6 +112,7 @@ func (p *SecondPlayer) Update(g *Game) {
 		bullet := NewBullet(spawnPos, p.rotation)
 		p.game.AddBullet(bullet)
 	}
+	// actionSnapshot = ""
 }
 
 // Draw renders the player sprite onto the screen.
