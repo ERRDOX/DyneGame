@@ -1,68 +1,56 @@
 package main
 
 import (
-	"bufio"
-	"flag"
 	"fmt"
 	"log"
-	"net"
 
-	"github.com/eiannone/keyboard"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 func main() {
-	port := flag.String("port", "8080", "Port to connect to")
-	flag.Parse()
-	conn, err := net.Dial("tcp", "localhost:"+*port)
+	// Initialize SDL
+	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+		log.Fatalf("Could not initialize SDL: %s\n", err)
+	}
+	defer sdl.Quit()
+
+	// Create a window
+	window, err := sdl.CreateWindow("Key Press/Release Example", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 800, 600, sdl.WINDOW_SHOWN)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalf("Could not create window: %s\n", err)
 	}
-	reader := bufio.NewReader(conn)
-	defer conn.Close()
+	defer window.Destroy()
 
-	if err := keyboard.Open(); err != nil {
-		log.Fatal(err)
+	// Create a surface to render to
+	surface, err := window.GetSurface()
+	if err != nil {
+		log.Fatalf("Could not get window surface: %s\n", err)
 	}
-	defer keyboard.Close()
 
-	fmt.Println("Press ESC to quit")
-	for {
-		char, key, err := keyboard.GetKey()
-		if err != nil {
-			log.Fatal(err)
-		}
+	running := true
+	for running {
+		// Poll for events
+		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			switch t := event.(type) {
+			case *sdl.QuitEvent:
+				running = false
 
-		if key != 0 {
-			// Handling special keys
-			var keyString string
-			switch key {
-			case keyboard.KeyArrowUp:
-				keyString = "ArrowUp"
-			case keyboard.KeyArrowDown:
-				keyString = "ArrowDown"
-			case keyboard.KeyArrowLeft:
-				keyString = "ArrowLeft"
-			case keyboard.KeyArrowRight:
-				keyString = "ArrowRight"
-			default:
-				keyString = fmt.Sprintf("%v", key)
+			case *sdl.KeyboardEvent:
+				// Check if the event is a key press or key release
+				if t.State == sdl.PRESSED {
+					fmt.Printf("Key Pressed: %s\n", sdl.GetKeyName(sdl.Keycode(t.Keysym.Sym)))
+				} else if t.State == sdl.RELEASED {
+					fmt.Printf("Key Released: %s\n", sdl.GetKeyName(sdl.Keycode(t.Keysym.Sym)))
+				}
 			}
-			conn.Write([]byte(keyString))
-		} else if char != 0 {
-			conn.Write([]byte(string(char)))
 		}
-		data, err := reader.ReadByte()
-		if err != nil {
-			fmt.Println("Error reading:", err.Error())
-			break
-		}
-		fmt.Print("server message: received  data:", data, "    ")
 
-		fmt.Printf("You pressed: %q, key code: %v\n", char, key)
-		if key == keyboard.KeyEsc {
-			break
-		}
+		// Update the window surface
+		surface.FillRect(nil, sdl.MapRGB(surface.Format, 0, 0, 0))
+		window.UpdateSurface()
+
+		// Small delay to avoid high CPU usage
+		sdl.Delay(16)
 	}
 
 	fmt.Println("Program exited")

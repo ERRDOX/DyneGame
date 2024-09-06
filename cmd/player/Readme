@@ -5,3 +5,7 @@ cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
 go env -w GOOS=js GOARCH=wasm
 
 go env -w GOOS=windows GOARCH=amd64
+
+Powershell
+$env:GOOS = "js"
+$env:GOARCH = "wasm"

@@ -3,9 +3,10 @@ module dynegame
 go 1.21.4
 
 require (
-	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
+	github.com/gorilla/websocket v1.5.3
 	github.com/hajimehoshi/ebiten/v2 v2.6.3
 	github.com/m110/airplanes v0.0.0-20230105112733-84cadf213222
+	github.com/veandco/go-sdl2 v0.4.40
 	github.com/yohamta/donburi v1.3.13
 	golang.org/x/image v0.14.0
 )
@@ -13,7 +14,6 @@ require (
 require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/ebitengine/purego v0.5.0 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jezek/xgb v1.1.0 // indirect
 	github.com/lafriks/go-tiled v0.10.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20230817173708-d852ddb80c63 // indirect

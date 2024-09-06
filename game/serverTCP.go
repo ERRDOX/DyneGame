@@ -12,27 +12,27 @@ import (
 )
 
 const (
-	CONN_HOST = "localhost"
+	CONN_HOST = "0.0.0.0"
 	CONN_PORT = "8080"
 	CONN_TYPE = "tcp"
 )
 
 type Action struct {
 	mu  sync.Mutex
-	Act string
+	Act map[string]bool
 }
 
 func NewAction() *Action {
-	return &Action{Act: ""}
+	return &Action{Act: make(map[string]bool)}
 }
 
 func (a *Action) SetAct(act string) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	a.Act = act
+	a.Act[act] = true
 }
 
-func (a *Action) GetAct() string {
+func (a *Action) GetAct() map[string]bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	return a.Act

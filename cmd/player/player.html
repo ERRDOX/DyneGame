@@ -28,7 +28,7 @@
         document.addEventListener("keyup", function(event) {
             if (pressedKeys[event.key]) {
                 pressedKeys[event.key] = false; // Mark the key as not pressed
-                sendKeyRelease(event.key); // Optional: send key release to Go
+                sendKeyRelease(event.key); // Send the key release to Go
             }
         });
     </script>

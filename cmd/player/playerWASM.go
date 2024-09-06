@@ -11,12 +11,12 @@ import (
 var ws js.Value // Global variable to hold the WebSocket object
 
 func main() {
-	// Create a channel to block main function from exiting
+	// Create a channel to block the main function from exiting
 	c := make(chan struct{}, 0)
 
 	// Register a callback function for keyboard input
 	js.Global().Set("sendKeyPress", js.FuncOf(keyPress))
-	js.Global().Set("sendKeyRelease", js.FuncOf(keyRelease)) // Optional for key release
+	js.Global().Set("sendKeyRelease", js.FuncOf(keyRelease)) // Register key release function
 
 	// Open a WebSocket connection
 	connectWebSocket()
@@ -67,7 +67,7 @@ func keyPress(this js.Value, p []js.Value) interface{} {
 	return nil
 }
 
-// keyRelease is a callback function that handles key release events (optional)
+// keyRelease is a callback function that handles key release events
 func keyRelease(this js.Value, p []js.Value) interface{} {
 	key := p[0].String()
 	fmt.Println("Key released:", key)
