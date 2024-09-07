@@ -5,30 +5,24 @@
 </head>
 <body>
     <h1>Press any key and see the console for the output</h1>
-    <!-- Include the wasm_exec.js script -->
     <script src="wasm_exec.js"></script>
     <script>
-        const go = new Go(); // Create a new Go instance
+        const go = new Go(); 
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
         });
-
-        // Object to keep track of currently pressed keys
         const pressedKeys = {};
-
-        // Event listener for keydown event
         document.addEventListener("keydown", function(event) {
             if (!pressedKeys[event.key]) {
-                pressedKeys[event.key] = true; // Mark the key as pressed
-                sendKeyPress(event.key); // Send the key press to Go
+                pressedKeys[event.key] = true;
+                sendKeyPress(event.key);
             }
         });
 
-        // Event listener for keyup event
         document.addEventListener("keyup", function(event) {
             if (pressedKeys[event.key]) {
-                pressedKeys[event.key] = false; // Mark the key as not pressed
-                sendKeyRelease(event.key); // Send the key release to Go
+                pressedKeys[event.key] = false; 
+                sendKeyRelease(event.key); 
             }
         });
     </script>

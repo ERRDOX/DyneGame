@@ -1,3 +1,4 @@
+// go:build exclude
 package main
 
 import (
@@ -14,14 +15,12 @@ func main() {
 	}
 	defer sdl.Quit()
 
-	// Create a window
 	window, err := sdl.CreateWindow("Key Press/Release Example", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 800, 600, sdl.WINDOW_SHOWN)
 	if err != nil {
 		log.Fatalf("Could not create window: %s\n", err)
 	}
 	defer window.Destroy()
 
-	// Create a surface to render to
 	surface, err := window.GetSurface()
 	if err != nil {
 		log.Fatalf("Could not get window surface: %s\n", err)
@@ -29,14 +28,12 @@ func main() {
 
 	running := true
 	for running {
-		// Poll for events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				running = false
 
 			case *sdl.KeyboardEvent:
-				// Check if the event is a key press or key release
 				if t.State == sdl.PRESSED {
 					fmt.Printf("Key Pressed: %s\n", sdl.GetKeyName(sdl.Keycode(t.Keysym.Sym)))
 				} else if t.State == sdl.RELEASED {

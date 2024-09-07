@@ -16,7 +16,7 @@ func main() {
 
 	// Register a callback function for keyboard input
 	js.Global().Set("sendKeyPress", js.FuncOf(keyPress))
-	js.Global().Set("sendKeyRelease", js.FuncOf(keyRelease)) // Register key release function
+	js.Global().Set("sendKeyRelease", js.FuncOf(keyRelease))
 
 	// Open a WebSocket connection
 	connectWebSocket()
@@ -28,7 +28,6 @@ func main() {
 // connectWebSocket sets up the WebSocket connection
 func connectWebSocket() {
 	ws = js.Global().Get("WebSocket").New("ws://localhost:8080/ws")
-
 	// Define event handlers for the WebSocket
 	ws.Set("onopen", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		fmt.Println("WebSocket connection opened")
@@ -52,12 +51,11 @@ func connectWebSocket() {
 	}))
 }
 
-// keyPress is a callback function that handles keypress events
 func keyPress(this js.Value, p []js.Value) interface{} {
-	key := p[0].String() // Directly get the key name
+	key := "p" + p[0].String()
+	fmt.Println([]byte(key))
 	fmt.Println("Key pressed:", key)
 
-	// Send the key to WebSocket server
 	if ws.Truthy() {
 		ws.Call("send", key)
 	} else {
@@ -67,14 +65,13 @@ func keyPress(this js.Value, p []js.Value) interface{} {
 	return nil
 }
 
-// keyRelease is a callback function that handles key release events
 func keyRelease(this js.Value, p []js.Value) interface{} {
-	key := p[0].String()
+	key := "r" + p[0].String()
+	fmt.Println([]byte(key))
 	fmt.Println("Key released:", key)
 
-	// Send the key release to WebSocket server
 	if ws.Truthy() {
-		ws.Call("send", "release:"+key) // Example of sending key release event
+		ws.Call("send", key)
 	} else {
 		fmt.Println("WebSocket is not connected")
 	}

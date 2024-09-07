@@ -1,3 +1,5 @@
+// go:build exclude
+
 //go:build windows
 // +build windows
 
