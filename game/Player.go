@@ -18,11 +18,12 @@ const (
 )
 
 type Player struct {
-	game *Game
-
+	game     *Game
+	score    int
 	position Vector
 	rotation float64
 	sprite   []*ebiten.Image
+	bullet   []*Bullet
 
 	animationSpeed      float64
 	animationTimer      float64
@@ -113,7 +114,8 @@ func (p *Player) Update(g *Game) {
 		}
 
 		bullet := NewBullet(spawnPos, p.rotation)
-		p.game.AddBullet(bullet)
+		// p.bullet = append(p.bullet, bullet)
+		p.game.AddBulletPlayer(bullet)
 	}
 
 }

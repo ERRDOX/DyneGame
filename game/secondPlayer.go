@@ -21,10 +21,11 @@ import (
 type SecondPlayer struct {
 	game *Game
 
-	position Vector
-	rotation float64
-	sprite   []*ebiten.Image
-
+	score               int
+	position            Vector
+	rotation            float64
+	sprite              []*ebiten.Image
+	bullet              []*Bullet
 	animationSpeed      float64
 	animationTimer      float64
 	playerFramePosition int
@@ -60,44 +61,45 @@ func (p *SecondPlayer) Update(g *Game) {
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
 	actionSnapshot := g.Action.GetAct()
-	g.Action.SetAct("")
+
+	// g.Action.SetAct("")
 
 	fmt.Println("action", actionSnapshot)
 
-	if actionSnapshot == "ArrowRight" {
-		p.rotation -= rotateSpeed
-	}
-	if actionSnapshot == "ArrowLeft" {
+	if actionSnapshot["ArrowRight"] {
 		p.rotation += rotateSpeed
 	}
-	if actionSnapshot == "d" {
+	if actionSnapshot["ArrowLeft"] {
+		p.rotation -= rotateSpeed
+	}
+	if actionSnapshot["a"] {
 		p.position.X -= sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.X += sprintSpeed
 		}
 
 	}
-	if actionSnapshot == "a" {
+	if actionSnapshot["d"] {
 		p.position.X += sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.X -= sprintSpeed
 		}
 	}
 
-	if actionSnapshot == "s" {
+	if actionSnapshot["w"] {
 		p.position.Y -= sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.Y += sprintSpeed
 		}
 	}
-	if actionSnapshot == "w" {
+	if actionSnapshot["s"] {
 		p.position.Y += sprintSpeed
 		if p.playerObstacleCollisions(g) || p.peripheralCollision() {
 			p.position.Y -= sprintSpeed
 		}
 	}
 	p.shootCooldown.Update()
-	if p.shootCooldown.IsReady() && actionSnapshot == "Space" {
+	if p.shootCooldown.IsReady() && actionSnapshot[" "] {
 		p.shootCooldown.Reset()
 
 		bounds := p.sprite[1].Bounds()
@@ -110,7 +112,8 @@ func (p *SecondPlayer) Update(g *Game) {
 		}
 
 		bullet := NewBullet(spawnPos, p.rotation)
-		p.game.AddBullet(bullet)
+		// p.bullet = append(p.bullet, bullet)
+		p.game.AddBulletSecondPlayer(bullet)
 	}
 	// actionSnapshot = ""
 }

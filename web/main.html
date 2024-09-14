@@ -1,16 +1,65 @@
 <!DOCTYPE html>
-<script src="wasm_exec.js"></script>
-<script>
-// Polyfill
-if (!WebAssembly.instantiateStreaming) {
-    WebAssembly.instantiateStreaming = async (resp, importObject) => {
-        const source = await (await resp).arrayBuffer();
-        return await WebAssembly.instantiate(source, importObject);
-    };
-}
+<html>
+<head>
+    <title>My Game</title>
+    <script src="wasm_exec.js"></script>
+    <style>
+        /* Simple styling to center the canvas on the page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            /* Adjust size as needed */
+            width: 1800px;
+            height: 900px;
+        }
+    </style>
+</head>wada
+<body>
+    <canvas id="Canvas"></canvas>
+    <script>
+        // Polyfill
+        if (!WebAssembly.instantiateStreaming) {
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
 
-const go = new Go();
-WebAssembly.instantiateStreaming(fetch("game.wasm"), go.importObject).then(result => {
-    go.run(result.instance);
-});
-</script>
+        const go = new Go();
+        go.importObject.env = {
+            ...go.importObject.env,
+            // Make the canvas element available to your Go program
+            'ebiten_setCanvas': (canvas) => {
+                const canvasElement = document.getElementById('Canvas');
+                if (canvasElement) {
+                    canvasElement.getContext('2d').canvas = canvas;
+                }
+            }
+        };
+
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then(result => {
+            go.run(result.instance);
+        });
+
+        const pressedKeys = {};
+        document.addEventListener("keydown", function(event) {
+            if (!pressedKeys[event.key]) {
+                pressedKeys[event.key] = true;
+                sendKeyPress(event.key);
+            }
+        });
+
+        document.addEventListener("keyup", function(event) {
+            if (pressedKeys[event.key]) {
+                pressedKeys[event.key] = false; 
+                sendKeyRelease(event.key); 
+            }
+        });
+    </script>
+</body>
+</html>

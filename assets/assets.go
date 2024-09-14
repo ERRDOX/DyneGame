@@ -14,18 +14,17 @@ import (
 //go:embed *
 var assets embed.FS
 
-var BackGround = mustLoadImage("background/dsrtBackGround.png")
+var BackGround = mustLoadImage("background/2dDoom.png")
 
-// var PlayerSprite = mustLoadImage("samples/player.png")
 var MeteorSprites = mustLoadImages("meteors/*.png")
 
-// var ExplosionSprites = mustLoadImage("explosion/")
 var PoleSprite = mustLoadImage("pole.png")
 var ScoreFont = mustLoadFont("font.ttf")
 
-// var Humanplayer = mustLoadImages("human/*.png")
 var Obstacle = mustLoadImages("obstacles/*.png")
 var PlanePlayer = mustLoadImages("plane/*.png")
+
+var Explosion = mustLoadImages("explosion/explosion*.png")
 
 func mustLoadImage(name string) *ebiten.Image {
 	f, err := assets.Open(name)

@@ -1,7 +1,3 @@
-//go:build ignore
-// +build ignore
-
-// go:build exclude
 package game
 
 import (
@@ -24,20 +20,25 @@ const (
 
 type Action struct {
 	mu  sync.Mutex
-	Act string
+	Act map[string]bool
 }
 
 func NewAction() *Action {
-	return &Action{Act: ""}
+	return &Action{Act: make(map[string]bool)}
 }
 
 func (a *Action) SetAct(act string) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	a.Act = act
+	a.Act[act] = true
+}
+func (a *Action) RemoveAct(act string) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.Act[act] = false
 }
 
-func (a *Action) GetAct() string {
+func (a *Action) GetAct() map[string]bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	return a.Act
@@ -51,8 +52,8 @@ func (a *Action) Joiner() {
 
 	http.HandleFunc("/ws", a.handleConnections)
 	log.Println("Starting server on %s:%s\n", CONN_HOST, CONN_PORT)
-	log.Fatal(http.ListenAndServe(":"+CONN_PORT, nil))
-	log.Printf("Listening on %s:%s\n", CONN_HOST, CONN_PORT)
+	log.Fatalln(http.ListenAndServe(":"+CONN_PORT, nil))
+	fmt.Printf("Listening on %s:%s\n", CONN_HOST, CONN_PORT)
 
 	// Graceful shutdown
 	sigChan := make(chan os.Signal, 1)
@@ -93,9 +94,12 @@ func (a *Action) handleConnections(w http.ResponseWriter, r *http.Request) {
 		}
 		// data = data[:len(data)-1] // Remove newline character
 
-		fmt.Printf("Received: %s\n", string(data[:]))
-		println(data[:])
-		a.SetAct(string(data[:])) // Update action with new data
+		fmt.Println("Received: " + string(data[:]))
+		if data[0] == 112 {
+			a.SetAct(string(data[1:]))
+		} else {
+			a.RemoveAct(string(data[1:]))
+		}
 		if err := ws.WriteMessage(websocket.TextMessage, data); err != nil {
 			log.Println("write:", err)
 			break

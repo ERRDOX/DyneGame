@@ -1,3 +1,5 @@
+//go:build ignore
+
 package game
 
 import (
@@ -19,20 +21,20 @@ const (
 
 type Action struct {
 	mu  sync.Mutex
-	Act map[string]bool
+	Act string
 }
 
 func NewAction() *Action {
-	return &Action{Act: make(map[string]bool)}
+	return &Action{Act: ""}
 }
 
 func (a *Action) SetAct(act string) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	a.Act[act] = true
+	a.Act = act
 }
 
-func (a *Action) GetAct() map[string]bool {
+func (a *Action) GetAct() string {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	return a.Act

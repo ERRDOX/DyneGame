@@ -40,6 +40,14 @@ func (r Rect) MaxY() float64 {
 	return r.Y + r.Height
 }
 
+// Intersects checks if the current rectangle intersects with another rectangle.
+// It returns true if the rectangles overlap, otherwise false.
+//
+// Parameters:
+// - other: The rectangle to check for intersection with.
+//
+// Returns:
+// - bool: True if the rectangles intersect, false otherwise.
 func (r Rect) Intersects(other Rect) bool {
 	return r.X <= other.MaxX() &&
 		other.X <= r.MaxX() &&

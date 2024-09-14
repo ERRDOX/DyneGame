@@ -1,16 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Go WASM WebSocket</title>
+    <title>My Game</title>
+    <script src="wasm_exec.js"></script>
+    <style>
+        /* Simple styling to center the canvas on the page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            /* Adjust size as needed */
+            width: 800px;
+            height: 600px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Press any key and see the console for the output</h1>
-    <script src="wasm_exec.js"></script>
+    <canvas id="myCanvas"></canvas>
     <script>
-        const go = new Go(); 
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+        // Polyfill
+        if (!WebAssembly.instantiateStreaming) {
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+
+        const go = new Go();
+        go.importObject.env = {
+            ...go.importObject.env,
+            // Make the canvas element available to your Go program
+            'ebiten_setCanvas': (canvas) => {
+                const canvasElement = document.getElementById('myCanvas');
+                if (canvasElement) {
+                    canvasElement.getContext('2d').canvas = canvas;
+                }
+            }
+        };
+
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then(result => {
             go.run(result.instance);
         });
+
         const pressedKeys = {};
         document.addEventListener("keydown", function(event) {
             if (!pressedKeys[event.key]) {
