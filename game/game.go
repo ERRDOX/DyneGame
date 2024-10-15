@@ -12,6 +12,10 @@ import (
 )
 
 const (
+	CONN_HOST = "localhost"
+	CONN_PORT = "27199"
+	CONN_TYPE = "tcp"
+
 	screenWidth  = 1800
 	screenHeight = 900
 	// screenWidth     = 800
@@ -166,6 +170,7 @@ func (g *Game) Update() error {
 		for i, b := range g.player.bullet {
 			if b.Collider(bulletBoundsDecreaseRatio).Intersects(g.SecondPlayer.Collider(humanBoundsDecreaseRatio)) {
 				g.player.bullet = append(g.player.bullet[:i], g.player.bullet[i+1:]...)
+				g.Explosion = append(g.Explosion, NewExplosion(b.position))
 				g.player.score++
 			}
 			for _, o := range g.obstacle {
@@ -183,6 +188,7 @@ func (g *Game) Update() error {
 		for i, b := range g.SecondPlayer.bullet {
 			if b.Collider(bulletBoundsDecreaseRatio).Intersects(g.player.Collider(humanBoundsDecreaseRatio)) {
 				g.SecondPlayer.bullet = append(g.SecondPlayer.bullet[:i], g.SecondPlayer.bullet[i+1:]...)
+				g.Explosion = append(g.Explosion, NewExplosion(b.position))
 				g.SecondPlayer.score++
 			}
 			for _, o := range g.obstacle {
@@ -241,7 +247,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, e := range g.Explosion {
 		e.Draw(screen)
 	}
-
 	text.Draw(screen, fmt.Sprintf("%06d", g.SecondPlayer.score), assets.ScoreFont, screenWidth/4, 50, color.RGBA{128, 128, 128, 255})
 	text.Draw(screen, fmt.Sprintf("%06d", g.player.score), assets.ScoreFont, 3*screenWidth/4, 50, color.RGBA{128, 128, 128, 255})
 }

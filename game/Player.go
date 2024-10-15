@@ -39,8 +39,8 @@ func NewPlayer(game *Game) *Player {
 	halfH := float64(bounds.Dy()) / 2
 
 	pos := Vector{
-		X: screenWidth/2 - halfW,
-		Y: screenHeight - 4*halfH,
+		X: 4 * halfW,
+		Y: screenHeight/2 - halfH,
 	}
 
 	return &Player{

@@ -31,9 +31,9 @@ func (e *Explosion) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 
 	op.GeoM.Translate(e.position.X, e.position.Y)
-	// for _, img := range e.sprite {
-	screen.DrawImage(e.sprite[2], op)
-	time.Sleep(50 * time.Millisecond)
+	// for i := range e.sprite {
+	screen.DrawImage(e.sprite[3], op)
+	time.Sleep(70 * time.Millisecond)
+	// println(i)
 	// }
-
 }

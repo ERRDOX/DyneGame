@@ -59,7 +59,7 @@ func NewObstacle(n int) []*Obstacle {
 
 	return obstacles
 }
-func NewMaptoObstacle(m [][]uint8) []*Obstacle {
+func NewMaptoObstacle(m [][]uint16) []*Obstacle {
 	sprite := assets.Obstacle[rand.Intn(len(assets.Obstacle))]
 	// height := screenHeight / 100
 	// width := screenWidth / 100
