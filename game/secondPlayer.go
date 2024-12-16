@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -64,7 +63,7 @@ func (p *SecondPlayer) Update(g *Game) {
 
 	// g.Action.SetAct("")
 
-	fmt.Println("action", actionSnapshot)
+	// fmt.Println("action", actionSnapshot)
 
 	if actionSnapshot["ArrowRight"] {
 		p.rotation += rotateSpeed

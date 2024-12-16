@@ -12,9 +12,13 @@ import (
 )
 
 const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "27199"
-	CONN_TYPE = "tcp"
+	ACT_SERVER_CONN_HOST    = "localhost"
+	ACT_SERVER_CONN_PORT    = "27199" //socket port
+	ACT_SERVER_CONN_TYPE    = "tcp"
+	STATUS_SERVER_CONN_HOST = "localhost"
+	STATUS_SERVER_CONN_PORT = "27198" //socket port
+	STATUS_SERVER_CONN_TYPE = "tcp"
+	MAP                     = "DragonMap"
 
 	screenWidth  = 1800
 	screenHeight = 900
@@ -53,11 +57,12 @@ func NewGame() *Game {
 		velocityTimer:    NewTimer(meteorSpeedUpTime),
 	}
 
-	g.obstacle = append(g.obstacle, NewMaptoObstacle(Map10)...)
+	g.obstacle = append(g.obstacle, NewMaptoObstacle(DragonMap)...)
 	g.Action = NewAction()
 	g.SecondPlayer = NewSecondPlayer(g)
 	g.player = NewPlayer(g)
-	go g.Action.Joiner()
+	// go g.Action.Server()
+	go g.resposeServer()
 
 	return g
 }
@@ -165,7 +170,7 @@ func (g *Game) Update() error {
 	// 	}
 	// }
 	// go bulletObjectCollisions()
-	// player hit second player
+	// player hit secondplayer
 	bulletPlayerCollisions := func() {
 		for i, b := range g.player.bullet {
 			if b.Collider(bulletBoundsDecreaseRatio).Intersects(g.SecondPlayer.Collider(humanBoundsDecreaseRatio)) {
@@ -181,6 +186,7 @@ func (g *Game) Update() error {
 			}
 
 		}
+
 	}
 	go bulletPlayerCollisions()
 	// SecondPalyer hit player
@@ -221,6 +227,7 @@ func (g *Game) Update() error {
 	// 	}
 	// }
 	// go objectHumanCollisions()
+	// TODO: return Termination
 	return nil
 }
 func (g *Game) Draw(screen *ebiten.Image) {
