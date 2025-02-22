@@ -43,9 +43,19 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-func (g *Game) respPosition() {
+//	func (g *Game) respPosition() {
+//		fmt.Printf("Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
+//		http.HandleFunc("/ws/position", g.respPosHandler)
+//		log.Fatalln(http.ListenAndServe(":"+STATUS_SERVER_CONN_PORT, nil))
+//	}
+func (g *Game) ServerHandler() {
 	fmt.Printf("Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
-	http.HandleFunc("/ws/position", g.respPosHandler)
+	go func() {
+		http.HandleFunc("/ws/position", g.respPosHandler)
+	}()
+	go func() {
+		http.HandleFunc("/ws/bullet", g.respBulletHandler)
+	}()
 	log.Fatalln(http.ListenAndServe(":"+STATUS_SERVER_CONN_PORT, nil))
 }
 func (g *Game) respPosHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,13 +65,6 @@ func (g *Game) respPosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	for {
-		// // Read until a newline or EOF
-		// _, data, err := ws.ReadMessage()
-		// if err != nil {
-		// 	log.Printf("Error reading: %v\n", err)
-		// 	break
-		// }
-		// if string(data[:]) == "pos" {
 		time.Sleep(120 * time.Millisecond)
 		fmt.Printf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)))
@@ -71,12 +74,6 @@ func (g *Game) respPosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Server is a function that starts the server intializing the websocket for the position of all player in the game
-func (g *Game) respBullet() {
-	fmt.Printf("Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
-	http.HandleFunc("/ws/bullet", g.respBulletHandler)
-	log.Fatalln(http.ListenAndServe(":"+STATUS_SERVER_CONN_PORT, nil))
-}
 func (g *Game) respBulletHandler(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

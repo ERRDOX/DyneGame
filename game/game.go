@@ -61,8 +61,8 @@ func NewGame() *Game {
 	g.Action = NewAction()
 	g.SecondPlayer = NewSecondPlayer(g)
 	g.player = NewPlayer(g)
-	// go g.Action.Server()
-	go g.respBullet()
+	go g.Action.Server()
+	go g.ServerHandler()
 
 	return g
 }
