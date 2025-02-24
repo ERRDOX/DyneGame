@@ -43,22 +43,38 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-//	func (g *Game) respPosition() {
-//		fmt.Printf("Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
-//		http.HandleFunc("/ws/position", g.respPosHandler)
-//		log.Fatalln(http.ListenAndServe(":"+STATUS_SERVER_CONN_PORT, nil))
-//	}
-func (g *Game) ServerHandler() {
+// ServerInit is a function that starts the server intializing the websocket
+func (a *Action) ServerInit() {
+	fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
+	http.HandleFunc("/ws", a.serverHandlClientAction)
+	log.Fatalln(http.ListenAndServe(":"+ACT_SERVER_CONN_PORT, nil))
+	// fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
+	// Graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		log.Println("Shutting down server...")
+		os.Exit(0)
+	}()
+}
+func (g *Game) ServerPositionBullet() {
 	fmt.Printf("Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
 	go func() {
-		http.HandleFunc("/ws/position", g.respPosHandler)
+		http.HandleFunc("/ws/hostposition", g.respHostPosHandler)
 	}()
 	go func() {
-		http.HandleFunc("/ws/bullet", g.respBulletHandler)
+		http.HandleFunc("/ws/clientposition", g.respClientPosHandler)
+	}()
+	go func() {
+		http.HandleFunc("/ws/clientbullet", g.respClientBulletHandler)
+	}()
+	go func() {
+		http.HandleFunc("/ws/hostbullet", g.respHostBulletHandler)
 	}()
 	log.Fatalln(http.ListenAndServe(":"+STATUS_SERVER_CONN_PORT, nil))
 }
-func (g *Game) respPosHandler(w http.ResponseWriter, r *http.Request) {
+func (g *Game) respHostPosHandler(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -68,13 +84,48 @@ func (g *Game) respPosHandler(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(120 * time.Millisecond)
 		fmt.Printf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)))
+		fmt.Println("Received: ")
+
+	}
+}
+func (g *Game) respClientPosHandler(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ws.Close()
+	for {
+		time.Sleep(120 * time.Millisecond)
+		fmt.Printf("%f,%f,%f", g.SecondPlayer.position.X, g.SecondPlayer.position.Y, g.SecondPlayer.rotation)
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", g.SecondPlayer.position.X, g.SecondPlayer.position.Y, g.SecondPlayer.rotation)))
 		fmt.Println("Received: ")
 
 	}
 }
 
-func (g *Game) respBulletHandler(w http.ResponseWriter, r *http.Request) {
+func (g *Game) respClientBulletHandler(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ws.Close()
+	for {
+		time.Sleep(120 * time.Millisecond)
+		if len(g.SecondPlayer.bullet) == 0 {
+			continue
+		}
+		for _, b := range g.player.bullet {
+			ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", b.Position.X, b.Position.Y, b.Rotation)))
+			fmt.Printf("Sent: %f, %f, %f\n", b.Position.X, b.Position.Y, b.Rotation)
+		}
+		if err != nil {
+			log.Printf("Error marshalling bullet data: %v\n", err)
+			break
+		}
+	}
+}
+
+func (g *Game) respHostBulletHandler(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -86,8 +137,8 @@ func (g *Game) respBulletHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		for _, b := range g.player.bullet {
-			ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", b.position.X, b.position.Y, b.rotation)))
-			fmt.Printf("Sent: %f, %f, %f\n", b.position.X, b.position.Y, b.rotation)
+			ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", b.Position.X, b.Position.Y, b.Rotation)))
+			fmt.Printf("Sent: %f, %f, %f\n", b.Position.X, b.Position.Y, b.Rotation)
 		}
 		if err != nil {
 			log.Printf("Error marshalling bullet data: %v\n", err)
@@ -96,30 +147,11 @@ func (g *Game) respBulletHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Server is a function that starts the server intializing the websocket for the position of all player in the game
-func (a *Action) Server() {
-	fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
-	http.HandleFunc("/ws", a.serverHandleConnections)
-	log.Fatalln(http.ListenAndServe(":"+ACT_SERVER_CONN_PORT, nil))
-	fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
-
-	// Graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		log.Println("Shutting down server...")
-		os.Exit(0)
-	}()
-
-}
-
-// the rival function is the same as the server function
-// but it is used to connect to the server for the second player
-func (a *Action) Rival() {
-
-	http.HandleFunc("/ws/rival", a.rivalHandleConnections)
-	log.Printf("Starting rival on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
+// the ServerHostAct function is the same as the server function
+// but it is used to connect to the server for the client player
+func (a *Action) ServerHostAct() {
+	http.HandleFunc("/ws/ServerHostAct", a.rivalHandleConnections)
+	log.Printf("Starting Host on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
 	log.Fatalln(http.ListenAndServe(":"+ACT_SERVER_CONN_PORT, nil))
 
 	// Graceful shutdown
@@ -165,7 +197,7 @@ func (a *Action) rivalHandleConnections(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (a *Action) serverHandleConnections(w http.ResponseWriter, r *http.Request) {
+func (a *Action) serverHandlClientAction(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -201,7 +233,7 @@ func (a *Action) serverHandleConnections(w http.ResponseWriter, r *http.Request)
 
 // call server to get the map
 func (a *Action) GetMap() string {
-	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8080/ws", nil)
+	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8080/ws/map", nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 
 	"dynegame/assets"
+	"dynegame/utils"
 )
 
 const (
@@ -40,30 +41,29 @@ type Game struct {
 	player           *Player
 	SecondPlayer     *SecondPlayer
 	Action           *Action
-	meteorSpawnTimer *Timer
-	Explosion        []*Explosion
-	obstacle         []*Obstacle
+	meteorSpawnTimer *utils.Timer
+	Explosion        []*utils.Explosion
+	obstacle         []*utils.Obstacle
 	meteors          []*Meteor
-	bullets          []*Bullet
+	bullets          []*utils.Bullet
 	score            int
 	baseVelocity     float64
-	velocityTimer    *Timer
+	velocityTimer    *utils.Timer
 }
 
 func NewGame() *Game {
 	g := &Game{
-		meteorSpawnTimer: NewTimer(meteorSpawnTime),
+		meteorSpawnTimer: utils.NewTimer(meteorSpawnTime),
 		baseVelocity:     baseMeteorVelocity,
-		velocityTimer:    NewTimer(meteorSpeedUpTime),
+		velocityTimer:    utils.NewTimer(meteorSpeedUpTime),
 	}
 
-	g.obstacle = append(g.obstacle, NewMaptoObstacle(DragonMap)...)
+	g.obstacle = append(g.obstacle, utils.NewMaptoObstacle(utils.DragonMap)...)
 	g.Action = NewAction()
 	g.SecondPlayer = NewSecondPlayer(g)
 	g.player = NewPlayer(g)
-	go g.Action.Server()
-	go g.ServerHandler()
-
+	// go g.Action.ServerInit()
+	go sendClientActionToServer()
 	return g
 }
 
@@ -117,17 +117,17 @@ func (g *Game) Update() error {
 		time.Sleep(3 * time.Second)
 		for i := len(g.player.bullet) - 1; i >= 0; i-- {
 			b := g.player.bullet[i]
-			if 0 > b.position.X || b.position.Y > screenHeight || 0 > b.position.Y || b.position.Y > screenWidth {
-				println("BULLET X: %f ", g.player.bullet[i].position.X)
-				println("BULLET Y: %f ", g.player.bullet[i].position.Y)
+			if 0 > b.Position.X || b.Position.Y > screenHeight || 0 > b.Position.Y || b.Position.Y > screenWidth {
+				// println("BULLET X: %f ", g.player.bullet[i].Position.X)
+				// println("BULLET Y: %f ", g.player.bullet[i].Position.Y)
 				g.player.bullet = append(g.player.bullet[:i], g.player.bullet[i+1:]...)
 			}
 		}
 		for i := len(g.SecondPlayer.bullet) - 1; i >= 0; i-- {
 			b := g.SecondPlayer.bullet[i]
-			if 0 > b.position.X || b.position.Y > screenHeight || 0 > b.position.Y || b.position.Y > screenWidth {
-				println("BULLET X: %f ", g.SecondPlayer.bullet[i].position.X)
-				println("BULLET Y: %f ", g.SecondPlayer.bullet[i].position.Y)
+			if 0 > b.Position.X || b.Position.Y > screenHeight || 0 > b.Position.Y || b.Position.Y > screenWidth {
+				// println("BULLET X: %f ", g.SecondPlayer.bullet[i].Position.X)
+				// println("BULLET Y: %f ", g.SecondPlayer.bullet[i].Position.Y)
 				g.SecondPlayer.bullet = append(g.SecondPlayer.bullet[:i], g.SecondPlayer.bullet[i+1:]...)
 			}
 		}
@@ -179,13 +179,13 @@ func (g *Game) Update() error {
 			}
 			if b.Collider(bulletBoundsDecreaseRatio).Intersects(g.SecondPlayer.Collider(humanBoundsDecreaseRatio)) {
 				g.player.bullet = append(g.player.bullet[:i], g.player.bullet[i+1:]...)
-				g.Explosion = append(g.Explosion, NewExplosion(b.position))
+				g.Explosion = append(g.Explosion, utils.NewExplosion(b.Position))
 				g.player.score++
 			}
 			for _, o := range g.obstacle {
 				if b.Collider(bulletBoundsDecreaseRatio).Intersects(o.Collider()) {
 					g.player.bullet = append(g.player.bullet[:i], g.player.bullet[i+1:]...)
-					g.Explosion = append(g.Explosion, NewExplosion(b.position))
+					g.Explosion = append(g.Explosion, utils.NewExplosion(b.Position))
 				}
 			}
 
@@ -198,13 +198,13 @@ func (g *Game) Update() error {
 		for i, b := range g.SecondPlayer.bullet {
 			if b.Collider(bulletBoundsDecreaseRatio).Intersects(g.player.Collider(humanBoundsDecreaseRatio)) {
 				g.SecondPlayer.bullet = append(g.SecondPlayer.bullet[:i], g.SecondPlayer.bullet[i+1:]...)
-				g.Explosion = append(g.Explosion, NewExplosion(b.position))
+				g.Explosion = append(g.Explosion, utils.NewExplosion(b.Position))
 				g.SecondPlayer.score++
 			}
 			for _, o := range g.obstacle {
 				if b.Collider(bulletBoundsDecreaseRatio).Intersects(o.Collider()) {
 					g.SecondPlayer.bullet = append(g.SecondPlayer.bullet[:i], g.SecondPlayer.bullet[i+1:]...)
-					g.Explosion = append(g.Explosion, NewExplosion(b.position))
+					g.Explosion = append(g.Explosion, utils.NewExplosion(b.Position))
 				}
 			}
 		}
@@ -235,7 +235,7 @@ func (g *Game) Update() error {
 	return nil
 }
 func (g *Game) Draw(screen *ebiten.Image) {
-	Background(screen)
+	utils.Background(screen)
 	g.player.DrawShadow(screen)
 	g.player.Draw(screen)
 
@@ -266,10 +266,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 //	func (g *Game) AddBullet(b *Bullet) {
 //		g.bullets = append(g.bullets, b)
 //	}
-func (g *Game) AddBulletPlayer(b *Bullet) {
+func (g *Game) AddBulletPlayer(b *utils.Bullet) {
 	g.player.bullet = append(g.player.bullet, b)
 }
-func (g *Game) AddBulletSecondPlayer(b *Bullet) {
+func (g *Game) AddBulletSecondPlayer(b *utils.Bullet) {
 	g.SecondPlayer.bullet = append(g.SecondPlayer.bullet, b)
 }
 
