@@ -51,7 +51,7 @@ type Game struct {
 	velocityTimer    *utils.Timer
 }
 
-func NewGame() *Game {
+func NewGameClient() *Game {
 	g := &Game{
 		meteorSpawnTimer: utils.NewTimer(meteorSpawnTime),
 		baseVelocity:     baseMeteorVelocity,
@@ -62,8 +62,23 @@ func NewGame() *Game {
 	g.Action = NewAction()
 	g.SecondPlayer = NewSecondPlayer(g)
 	g.player = NewPlayer(g)
-	// go g.Action.ServerInit()
-	go sendClientActionToServer()
+	go SendClientActionToServer()
+	return g
+}
+
+func NewGameHost() *Game {
+	g := &Game{
+		meteorSpawnTimer: utils.NewTimer(meteorSpawnTime),
+		baseVelocity:     baseMeteorVelocity,
+		velocityTimer:    utils.NewTimer(meteorSpeedUpTime),
+	}
+
+	g.obstacle = append(g.obstacle, utils.NewMaptoObstacle(utils.DragonMap)...)
+	g.Action = NewAction()
+	g.SecondPlayer = NewSecondPlayer(g)
+	g.player = NewPlayer(g)
+	go g.Action.ServerGetClientAction()
+	go g.ServeBulletPosAndPlayerPos()
 	return g
 }
 
