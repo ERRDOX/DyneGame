@@ -44,7 +44,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // ServerInit is a function that starts the server intializing the websocket
-func (a *Action) ServerInit() {
+func (a *Action) ServerGetClientAction() {
 	fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
 	http.HandleFunc("/ws", a.serverHandlClientAction)
 	log.Fatalln(http.ListenAndServe(":"+ACT_SERVER_CONN_PORT, nil))
@@ -58,22 +58,25 @@ func (a *Action) ServerInit() {
 		os.Exit(0)
 	}()
 }
-func (g *Game) ServerPositionBullet() {
-	fmt.Printf("Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
+
+// this handler is used to send the player action to the client
+func (g *Game) ServeBulletPosAndPlayerPos() {
+	fmt.Printf("Serving bullets Listening on %s:%s\n", STATUS_SERVER_CONN_HOST, STATUS_SERVER_CONN_PORT)
 	go func() {
-		http.HandleFunc("/ws/hostposition", g.respHostPosHandler)
+		http.HandleFunc("/ws/position/bullet/client", g.respClientBulletHandler)
 	}()
 	go func() {
-		http.HandleFunc("/ws/clientposition", g.respClientPosHandler)
+		http.HandleFunc("/ws/position/bullet/host", g.respHostBulletHandler)
 	}()
 	go func() {
-		http.HandleFunc("/ws/clientbullet", g.respClientBulletHandler)
+		http.HandleFunc("/ws/position/host", g.respHostPosHandler)
 	}()
 	go func() {
-		http.HandleFunc("/ws/hostbullet", g.respHostBulletHandler)
+		http.HandleFunc("/ws/position/client", g.respClientPosHandler)
 	}()
 	log.Fatalln(http.ListenAndServe(":"+STATUS_SERVER_CONN_PORT, nil))
 }
+
 func (g *Game) respHostPosHandler(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
