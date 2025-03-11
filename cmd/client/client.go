@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	g := game.NewGame()
+	g := game.NewGameClient()
 	// ebiten.SetFullscreen(true)
 
 	err := ebiten.RunGame(g)
