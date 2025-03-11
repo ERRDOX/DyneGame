@@ -12,8 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func sendClientActionToServer() {
-	// Graceful shutdown
+func SendClientActionToServer() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -22,7 +21,6 @@ func sendClientActionToServer() {
 		os.Exit(0)
 	}()
 
-	// Establish WebSocket connection
 	url := fmt.Sprintf("ws://%s:%s/ws", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
@@ -31,7 +29,6 @@ func sendClientActionToServer() {
 	defer conn.Close()
 	log.Printf("Client connected to server %s\n", url)
 
-	// Send initial "map" request and log the response
 	if err := conn.WriteMessage(websocket.TextMessage, []byte("map")); err != nil {
 		log.Println("Error sending map request:", err)
 		return
@@ -42,8 +39,6 @@ func sendClientActionToServer() {
 		return
 	}
 	log.Printf("Map is %s\n", string(message))
-
-	// Define the keys to track and their corresponding messages.
 	keysToSend := []struct {
 		key     ebiten.Key
 		message string
@@ -66,19 +61,17 @@ func sendClientActionToServer() {
 	for {
 		for _, k := range keysToSend {
 			isPressed := ebiten.IsKeyPressed(k.key)
-			// wasPressed := keyStates[k.key] // defaults to false if not present
-
-			// If the key has just been pressed, send the press event.
-			if isPressed {
-				msg := fmt.Sprintf("p: ", k.message)
+			wasPressed := keyStates[k.key]
+			if isPressed && !wasPressed {
+				msg := fmt.Sprintf("p:%s", k.message)
 				if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
 					log.Println("Error sending key press action:", err)
 					return
 				}
 				keyStates[k.key] = true
-			} else if !isPressed {
+			} else if !isPressed && wasPressed {
 				// If the key was pressed and is now released, send the release event.
-				msg := fmt.Sprintf("r:", k.message)
+				msg := fmt.Sprintf("r:%s", k.message)
 				if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
 					log.Println("Error sending key release action:", err)
 					return
@@ -88,6 +81,6 @@ func sendClientActionToServer() {
 		}
 
 		// Small sleep to prevent a busy loop.
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(30 * time.Millisecond)
 	}
 }
