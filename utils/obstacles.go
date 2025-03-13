@@ -1,4 +1,4 @@
-package game
+package utils
 
 import (
 	"math/rand"
@@ -37,11 +37,11 @@ type Obstacle struct {
 
 //		return obstacles
 //	}
-func NewObstacle(n int) []*Obstacle {
+func (c Config) NewObstacle(n int) []*Obstacle {
 	obstacles := make([]*Obstacle, n)
 	pos := Vector{
-		X: screenWidth / 2,
-		Y: screenHeight,
+		X: float64(c.screenWidth) / 2,
+		Y: float64(c.screenHeight),
 	}
 	for i := 0; i < n; i++ {
 		sprite := assets.Obstacle[rand.Intn(len(assets.Obstacle))]
@@ -49,7 +49,7 @@ func NewObstacle(n int) []*Obstacle {
 			position: pos,
 			sprite:   sprite,
 		}
-		chunk := screenWidth / n
+		chunk := c.screenWidth / n
 		o.position.Y = o.position.Y - float64(sprite.Bounds().Dy())
 		nextNum := rand.Intn(chunk)
 		o.position.X = float64(i*chunk + nextNum)
@@ -59,7 +59,7 @@ func NewObstacle(n int) []*Obstacle {
 
 	return obstacles
 }
-func NewMaptoObstacle(m [][]uint8) []*Obstacle {
+func NewMaptoObstacle(m [][]uint16) []*Obstacle {
 	sprite := assets.Obstacle[rand.Intn(len(assets.Obstacle))]
 	// height := screenHeight / 100
 	// width := screenWidth / 100

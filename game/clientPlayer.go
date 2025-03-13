@@ -1,8 +1,9 @@
 package game
 
 import (
-	"fmt"
 	"math"
+
+	"dynegame/utils"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -19,17 +20,16 @@ import (
 // )
 
 type SecondPlayer struct {
-	game *Game
-
+	game                *Game
 	score               int
-	position            Vector
+	position            utils.Vector
 	rotation            float64
 	sprite              []*ebiten.Image
-	bullet              []*Bullet
+	bullet              []*utils.Bullet
 	animationSpeed      float64
 	animationTimer      float64
 	playerFramePosition int
-	shootCooldown       *Timer
+	shootCooldown       *utils.Timer
 }
 
 func NewSecondPlayer(game *Game) *SecondPlayer {
@@ -39,9 +39,9 @@ func NewSecondPlayer(game *Game) *SecondPlayer {
 	halfW := float64(bounds.Dx()) / 2
 	halfH := float64(bounds.Dy()) / 2
 
-	pos := Vector{
-		X: screenWidth/2 - halfW,
-		Y: screenHeight - 4*halfH,
+	pos := utils.Vector{
+		X: screenWidth - 4*halfW,
+		Y: screenHeight/2 - halfH,
 	}
 
 	return &SecondPlayer{
@@ -51,7 +51,7 @@ func NewSecondPlayer(game *Game) *SecondPlayer {
 		sprite:         sprite,
 		animationSpeed: 0.2,
 		animationTimer: 0,
-		shootCooldown:  NewTimer(shootCooldown),
+		shootCooldown:  utils.NewTimer(shootCooldown),
 	}
 }
 
@@ -61,10 +61,6 @@ func (p *SecondPlayer) Update(g *Game) {
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
 	actionSnapshot := g.Action.GetAct()
-
-	// g.Action.SetAct("")
-
-	fmt.Println("action", actionSnapshot)
 
 	if actionSnapshot["ArrowRight"] {
 		p.rotation += rotateSpeed
@@ -106,12 +102,12 @@ func (p *SecondPlayer) Update(g *Game) {
 		halfW := float64(bounds.Dx()) / 2
 		halfH := float64(bounds.Dy()) / 2
 
-		spawnPos := Vector{
+		spawnPos := utils.Vector{
 			X: p.position.X + halfW + math.Sin(p.rotation)*bulletSpawnOffset,
 			Y: p.position.Y + halfH + math.Cos(p.rotation)*-bulletSpawnOffset,
 		}
 
-		bullet := NewBullet(spawnPos, p.rotation)
+		bullet := utils.NewBullet(spawnPos, p.rotation)
 		// p.bullet = append(p.bullet, bullet)
 		p.game.AddBulletSecondPlayer(bullet)
 	}
@@ -145,10 +141,10 @@ func (p *SecondPlayer) Draw(screen *ebiten.Image) {
 //
 // It does not take any parameters.
 // It returns a Rect.
-func (p *SecondPlayer) Collider(BoundsDecreaseRatio float64) Rect {
+func (p *SecondPlayer) Collider(BoundsDecreaseRatio float64) utils.Rect {
 	bounds := p.sprite[p.playerFramePosition].Bounds()
 
-	return NewRect(
+	return utils.NewRect(
 		p.position.X,
 		p.position.Y,
 		float64(bounds.Dx())*BoundsDecreaseRatio,

@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"dynegame/assets"
+	"dynegame/utils"
 )
 
 const (
@@ -20,15 +21,15 @@ const (
 type Player struct {
 	game     *Game
 	score    int
-	position Vector
+	position utils.Vector
 	rotation float64
 	sprite   []*ebiten.Image
-	bullet   []*Bullet
+	bullet   []*utils.Bullet
 
 	animationSpeed      float64
 	animationTimer      float64
 	playerFramePosition int
-	shootCooldown       *Timer
+	shootCooldown       *utils.Timer
 }
 
 func NewPlayer(game *Game) *Player {
@@ -38,9 +39,9 @@ func NewPlayer(game *Game) *Player {
 	halfW := float64(bounds.Dx()) / 2
 	halfH := float64(bounds.Dy()) / 2
 
-	pos := Vector{
-		X: screenWidth/2 - halfW,
-		Y: screenHeight - 4*halfH,
+	pos := utils.Vector{
+		X: 4 * halfW,
+		Y: screenHeight/2 - halfH,
 	}
 
 	return &Player{
@@ -50,7 +51,7 @@ func NewPlayer(game *Game) *Player {
 		sprite:         sprite,
 		animationSpeed: 0.1,
 		animationTimer: 0,
-		shootCooldown:  NewTimer(shootCooldown),
+		shootCooldown:  utils.NewTimer(shootCooldown),
 	}
 }
 
@@ -108,12 +109,12 @@ func (p *Player) Update(g *Game) {
 		halfW := float64(bounds.Dx()) / 2
 		halfH := float64(bounds.Dy()) / 2
 
-		spawnPos := Vector{
+		spawnPos := utils.Vector{
 			X: p.position.X + halfW + math.Sin(p.rotation)*bulletSpawnOffset,
 			Y: p.position.Y + halfH + math.Cos(p.rotation)*-bulletSpawnOffset,
 		}
 
-		bullet := NewBullet(spawnPos, p.rotation)
+		bullet := utils.NewBullet(spawnPos, p.rotation)
 		// p.bullet = append(p.bullet, bullet)
 		p.game.AddBulletPlayer(bullet)
 	}
@@ -147,10 +148,10 @@ func (p *Player) Draw(screen *ebiten.Image) {
 //
 // It does not take any parameters.
 // It returns a Rect.
-func (p *Player) Collider(BoundsDecreaseRatio float64) Rect {
+func (p *Player) Collider(BoundsDecreaseRatio float64) utils.Rect {
 	bounds := p.sprite[p.playerFramePosition].Bounds()
 
-	return NewRect(
+	return utils.NewRect(
 		p.position.X,
 		p.position.Y,
 		float64(bounds.Dx())*BoundsDecreaseRatio,

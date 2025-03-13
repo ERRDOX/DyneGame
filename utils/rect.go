@@ -14,7 +14,7 @@ If all these conditions are true, the rectangles intersect.
 	  |		|
 	  | 	|
 */
-package game
+package utils
 
 type Rect struct {
 	X      float64

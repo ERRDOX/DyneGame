@@ -1,4 +1,4 @@
-package game
+package utils
 
 import (
 	"math"
@@ -13,9 +13,9 @@ const (
 )
 
 type Bullet struct {
-	position Vector
-	rotation float64
-	sprite   *ebiten.Image
+	Position Vector
+	Rotation float64
+	Sprite   *ebiten.Image
 }
 
 func NewBullet(pos Vector, rotation float64) *Bullet {
@@ -29,9 +29,9 @@ func NewBullet(pos Vector, rotation float64) *Bullet {
 	pos.Y -= halfH
 
 	b := &Bullet{
-		position: pos,
-		rotation: rotation,
-		sprite:   sprite,
+		Position: pos,
+		Rotation: rotation,
+		Sprite:   sprite,
 	}
 
 	return b
@@ -40,31 +40,31 @@ func NewBullet(pos Vector, rotation float64) *Bullet {
 func (b *Bullet) Update() {
 	speed := bulletSpeedPerSecond / float64(ebiten.TPS())
 
-	b.position.X += math.Sin(b.rotation) * speed
-	b.position.Y += math.Cos(b.rotation) * -speed
+	b.Position.X += math.Sin(b.Rotation) * speed
+	b.Position.Y += math.Cos(b.Rotation) * -speed
 }
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
-	bounds := b.sprite.Bounds()
+	bounds := b.Sprite.Bounds()
 	halfW := float64(bounds.Dx()) / 2
 	halfH := float64(bounds.Dy()) / 2
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Rotate(b.rotation)
+	op.GeoM.Rotate(b.Rotation)
 	op.GeoM.Translate(halfW, halfH)
 
-	op.GeoM.Translate(b.position.X, b.position.Y)
+	op.GeoM.Translate(b.Position.X, b.Position.Y)
 
-	screen.DrawImage(b.sprite, op)
+	screen.DrawImage(b.Sprite, op)
 }
 
 func (b *Bullet) Collider(BoundsDecreaseRatio float64) Rect {
-	bounds := b.sprite.Bounds()
+	bounds := b.Sprite.Bounds()
 
 	return NewRect(
-		b.position.X,
-		b.position.Y,
+		b.Position.X,
+		b.Position.Y,
 		float64(bounds.Dx())*BoundsDecreaseRatio,
 		float64(bounds.Dy())*BoundsDecreaseRatio,
 	)

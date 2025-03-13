@@ -6,7 +6,7 @@ Calculating the Magnitude: The magnitude (or length) of the vector is calculated
 Dividing Each Component by the Magnitude: The X and Y components of the vector are each divided by the magnitude. This scales the vector so that its length is 1.
 The result is a new Vector where X and Y are the normalized components.
 */
-package game
+package utils
 
 import "math"
 

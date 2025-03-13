@@ -6,10 +6,8 @@ import (
 	"dynegame/game"
 )
 
-// todo: create cobra cli to handle cli variable to run client and host
 func main() {
-	g := game.NewGame()
-	// ebiten.SetFullscreen(true)
+	g := game.NewGameHost()
 
 	err := ebiten.RunGame(g)
 	if err != nil {

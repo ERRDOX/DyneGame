@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"dynegame/assets"
+	"dynegame/utils"
 )
 
 const (
@@ -14,9 +15,9 @@ const (
 )
 
 type Meteor struct {
-	position      Vector
+	position      utils.Vector
 	rotation      float64
-	movement      Vector
+	movement      utils.Vector
 	rotationSpeed float64
 	sprite        *ebiten.Image
 }
@@ -27,13 +28,13 @@ func ChasingMovement(m *Meteor, baseVelocity float64, p *Player) *Meteor {
 
 	velocity := baseVelocity + rand.Float64()*1.5
 
-	direction := Vector{
+	direction := utils.Vector{
 		X: target.X - pos.X,
 		Y: target.Y - pos.Y,
 	}
 	normalizedDirection := direction.Normalize()
 
-	m.movement = Vector{
+	m.movement = utils.Vector{
 		X: normalizedDirection.X * velocity,
 		Y: normalizedDirection.Y * velocity,
 	}
@@ -52,19 +53,19 @@ func NewMeteor(baseVelocity float64, p *Player) *Meteor {
 	// 	Y: posY,
 	// }
 	posX := rand.Float64() * float64(screenHeight)
-	pos := Vector{
+	pos := utils.Vector{
 		X: posX,
 		Y: 0, // upper edge of the screen
 	}
 	velocity := baseVelocity + rand.Float64()*1.5
 
-	direction := Vector{
+	direction := utils.Vector{
 		X: target.X - pos.X,
 		Y: target.Y - pos.Y,
 	}
 	normalizedDirection := direction.Normalize()
 
-	movement := Vector{
+	movement := utils.Vector{
 		X: normalizedDirection.X * velocity,
 		Y: normalizedDirection.Y * velocity,
 	}
@@ -101,10 +102,10 @@ func (m *Meteor) Draw(screen *ebiten.Image) {
 	screen.DrawImage(m.sprite, op)
 }
 
-func (m *Meteor) Collider(BoundsDecreaseRatio float64) Rect {
+func (m *Meteor) Collider(BoundsDecreaseRatio float64) utils.Rect {
 	bounds := m.sprite.Bounds()
 
-	return NewRect(
+	return utils.NewRect(
 		m.position.X,
 		m.position.Y,
 		float64(bounds.Dx())*BoundsDecreaseRatio,
