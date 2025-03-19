@@ -53,7 +53,6 @@ func (p *SecondPlayer) Update(g *Game) {
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
 	actionSnapshot := g.Action.GetAct()
-	fmt.Println("Action snapshot: ", actionSnapshot)
 
 	if actionSnapshot["right"] {
 		p.rotation += rotateSpeed
