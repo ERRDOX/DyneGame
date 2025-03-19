@@ -21,7 +21,7 @@ func SendClientActionToServer() {
 		os.Exit(0)
 	}()
 
-	url := fmt.Sprintf("ws://%s:%s/ws", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
+	url := fmt.Sprintf("ws://%s:%s/ws/action", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		log.Fatal("Error connecting to WebSocket server:", err)
@@ -47,8 +47,8 @@ func SendClientActionToServer() {
 		{ebiten.KeyA, "a"},
 		{ebiten.KeyS, "s"},
 		{ebiten.KeyD, "d"},
-		{ebiten.KeyUp, "up"},
-		{ebiten.KeyDown, "down"},
+		// {ebiten.KeyUp, "up"},
+		// {ebiten.KeyDown, "down"},
 		{ebiten.KeyLeft, "left"},
 		{ebiten.KeyRight, "right"},
 		{ebiten.KeySpace, "space"},
@@ -81,6 +81,6 @@ func SendClientActionToServer() {
 		}
 
 		// Small sleep to prevent a busy loop.
-		time.Sleep(30 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }

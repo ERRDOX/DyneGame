@@ -46,10 +46,9 @@ var upgrader = websocket.Upgrader{
 // ServerInit is a function that starts the server intializing the websocket
 func (a *Action) ServerGetClientAction() {
 	fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
-	http.HandleFunc("/ws", a.serverHandlClientAction)
+	http.HandleFunc("/ws/action", a.serverHandlClientAction)
 	log.Fatalln(http.ListenAndServe(":"+ACT_SERVER_CONN_PORT, nil))
-	// fmt.Printf("Listening on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
-	// Graceful shutdown
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -150,56 +149,6 @@ func (g *Game) respHostBulletHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// the ServerHostAct function is the same as the server function
-// but it is used to connect to the server for the client player
-func (a *Action) ServerHostAct() {
-	http.HandleFunc("/ws/ServerHostAct", a.rivalHandleConnections)
-	log.Printf("Starting Host on %s:%s\n", ACT_SERVER_CONN_HOST, ACT_SERVER_CONN_PORT)
-	log.Fatalln(http.ListenAndServe(":"+ACT_SERVER_CONN_PORT, nil))
-
-	// Graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		log.Println("Shutting down server...")
-		os.Exit(0)
-	}()
-
-}
-func (a *Action) rivalHandleConnections(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ws.Close()
-	for {
-		// Read until a newline or EOF
-		_, data, err := ws.ReadMessage()
-		if err != nil {
-			log.Printf("Error reading: %v\n", err)
-			break
-		}
-		// debug the map
-		if string(data[:]) == "map" {
-			ws.WriteMessage(websocket.TextMessage, []byte("DragonMap"))
-			break
-		}
-		// data = data[:len(data)-1] // Remove newline character
-
-		fmt.Println("Received: " + string(data[:]))
-		if data[0] == 112 {
-			a.SetAct(string(data[1:]))
-		} else {
-			a.RemoveAct(string(data[1:]))
-		}
-		if err := ws.WriteMessage(websocket.TextMessage, data); err != nil {
-			log.Println("write:", err)
-			break
-		}
-	}
-}
-
 func (a *Action) serverHandlClientAction(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -222,10 +171,12 @@ func (a *Action) serverHandlClientAction(w http.ResponseWriter, r *http.Request)
 		// data = data[:len(data)-1] // Remove newline character
 
 		fmt.Println("Received: " + string(data[:]))
+		fmt.Println("Data: ", data[:])
 		if data[0] == 112 {
-			a.SetAct(string(data[1:]))
+			fmt.Println("Setting act: " + string(data[2:]))
+			a.SetAct(string(data[2:]))
 		} else {
-			a.RemoveAct(string(data[1:]))
+			a.RemoveAct(string(data[2:]))
 		}
 		if err := ws.WriteMessage(websocket.TextMessage, data); err != nil {
 			log.Println("write:", err)

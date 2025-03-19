@@ -53,15 +53,6 @@ func NewPlayer(game *Game) *Player {
 
 // Update updates the player's position, rotation
 func (p *Player) Update(g *Game) {
-	// p.animationTimer += 1.2 / float64(ebiten.TPS())
-	// println(p.animationTimer, "animation speed : ", p.animationSpeed)
-	// if p.animationTimer >= p.animationSpeed {
-	// 	p.animationTimer = 0
-
-	// 	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyD) {
-	// 		p.playerFramePosition = (p.playerFramePosition + 1) % len(p.sprite)
-	// 	}
-	// }
 
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
@@ -156,12 +147,7 @@ func (p *Player) Collider(BoundsDecreaseRatio float64) utils.Rect {
 }
 
 // playerObstacleCollisions checks for collisions between the player and obstacles in the game.
-//
-// Parameters:
-// - g: A pointer to the Game struct.
-//
-// Returns:
-// - A boolean value indicating whether a collision occurred or not.
+
 func (p *Player) playerObstacleCollisions(g *Game) bool {
 	for _, m := range g.obstacle {
 		if m.Collider().Intersects(p.Collider(humanBoundsDecreaseRatio)) {

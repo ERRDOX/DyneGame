@@ -14,10 +14,10 @@ import (
 
 const (
 	ACT_SERVER_CONN_HOST    = "localhost"
-	ACT_SERVER_CONN_PORT    = "27199" //socket port
+	ACT_SERVER_CONN_PORT    = "27199" //Get action socket port
 	ACT_SERVER_CONN_TYPE    = "tcp"
 	STATUS_SERVER_CONN_HOST = "localhost"
-	STATUS_SERVER_CONN_PORT = "27198" //socket port
+	STATUS_SERVER_CONN_PORT = "27198" //Send status socket port
 	STATUS_SERVER_CONN_TYPE = "tcp"
 	MAP                     = "DragonMap"
 
@@ -89,22 +89,10 @@ func (g *Game) Update() error {
 		g.baseVelocity += meteorSpeedUpAmount
 	}
 
-	// g.Action.Joiner()
 	g.Explosion = nil
 	g.SecondPlayer.Update(g)
 	g.player.Update(g)
 
-	// g.meteorSpawnTimer.Update()
-	// if g.meteorSpawnTimer.IsReady() {
-	// 	g.meteorSpawnTimer.Reset()
-
-	// 	// m := NewMeteor(g.baseVelocity, g.player)
-	// 	g.meteors = append(g.meteors, m)
-	// }
-
-	// for _, m := range g.meteors {
-	// 	m.Update()
-	// }
 	for _, b := range g.bullets {
 		b.Update()
 	}
