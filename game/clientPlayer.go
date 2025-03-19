@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 
 	"dynegame/utils"
@@ -9,15 +10,6 @@ import (
 
 	"dynegame/assets"
 )
-
-// const (
-// shootCooldownPlayer2 = time.Millisecond * 400
-
-// 	rotationPerSecond = 1.1 * math.Pi
-
-// bulletSpawnOffset = 1.0
-// sprintSpeed       = 4
-// )
 
 type SecondPlayer struct {
 	game                *Game
@@ -47,9 +39,9 @@ func NewSecondPlayer(game *Game) *SecondPlayer {
 	return &SecondPlayer{
 		game:           game,
 		position:       pos,
-		rotation:       180,
+		rotation:       -1.6,
 		sprite:         sprite,
-		animationSpeed: 0.2,
+		animationSpeed: 0.1,
 		animationTimer: 0,
 		shootCooldown:  utils.NewTimer(shootCooldown),
 	}
@@ -61,11 +53,13 @@ func (p *SecondPlayer) Update(g *Game) {
 	rotateSpeed := rotationPerSecond / float64(ebiten.TPS())
 
 	actionSnapshot := g.Action.GetAct()
+	fmt.Println("Action snapshot: ", actionSnapshot)
 
-	if actionSnapshot["ArrowRight"] {
+	if actionSnapshot["right"] {
 		p.rotation += rotateSpeed
+		fmt.Println("Rotation: ", p.rotation)
 	}
-	if actionSnapshot["ArrowLeft"] {
+	if actionSnapshot["left"] {
 		p.rotation -= rotateSpeed
 	}
 	if actionSnapshot["a"] {
@@ -131,9 +125,6 @@ func (p *SecondPlayer) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(halfW, halfH)
 	op.GeoM.Translate(p.position.X, p.position.Y)
 
-	// op.GeoM.Translate(m.position.X, m.position.Y)
-	// op.GeoM.Translate(p.position.X, p.position.Y)
-	// op.GeoM.Rotate(p.rotation)
 	screen.DrawImage(p.sprite[p.playerFramePosition], op)
 }
 
@@ -153,12 +144,6 @@ func (p *SecondPlayer) Collider(BoundsDecreaseRatio float64) utils.Rect {
 }
 
 // playerObstacleCollisions checks for collisions between the player and obstacles in the game.
-//
-// Parameters:
-// - g: A pointer to the Game struct.
-//
-// Returns:
-// - A boolean value indicating whether a collision occurred or not.
 func (p *SecondPlayer) playerObstacleCollisions(g *Game) bool {
 	for _, m := range g.obstacle {
 		if m.Collider().Intersects(p.Collider(humanBoundsDecreaseRatio)) {
