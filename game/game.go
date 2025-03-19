@@ -114,20 +114,7 @@ func (g *Game) Update() error {
 	for _, b := range g.SecondPlayer.bullet {
 		b.Update()
 	}
-	// println("BULLET: ", len(g.bullets))
-	// println("BULLETP: ", len(g.player.bullet))
-	// println("BULLETSP: ", len(g.SecondPlayer.bullet))
 
-	// bulletOutofScreen := func() {
-	// 	for i, b := range g.bullets {
-	// 		if 0 > b.position.X || b.position.X > screenHeight || 0 > b.position.Y || b.position.Y > screenWidth {
-	// 			// println("BULLET X: ", g.meteors[i].position.X)
-	// 			// println("BULLET Y: ", g.meteors[i].position.Y)
-	// 			g.bullets = append(g.bullets[:i], g.bullets[i+1:]...)
-	// 		}
-	// 	}
-	// }
-	// go bulletOutofScreen()
 	bulletOutofScreenPlayer := func() {
 		time.Sleep(3 * time.Second)
 		for i := len(g.player.bullet) - 1; i >= 0; i-- {
@@ -224,29 +211,9 @@ func (g *Game) Update() error {
 			}
 		}
 	}
-	// if bullet contanct the obstackls
-	// for i, b := range g.SecondPlayer.bullet {
-	// 	for _, o := range g.obstacle {
-	// 		if b.Collider(bulletBoundsDecreaseRatio).Intersects(o.Collider()) {
-	// 			g.SecondPlayer.bullet = append(g.SecondPlayer.bullet[:i], g.SecondPlayer.bullet[i+1:]...)
-	// 			// g.obstacle = append(g.obstacle[:j], g.obstacle[j+1:]...)
-	// 		}
-	// 	}
-	// }
 
 	go bulletSecondPlayerCollisions()
 
-	// Check for meteor/player collisions
-	// objectHumanCollisions := func() {
-	// 	for _, m := range g.meteors {
-	// 		if m.Collider(objectBoundsDecreaseRatio).Intersects(g.player.Collider(humanBoundsDecreaseRatio)) {
-	// 			g.Reset()
-	// 			break
-	// 		}
-	// 	}
-	// }
-	// go objectHumanCollisions()
-	// TODO: return Termination
 	return nil
 }
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -256,10 +223,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.SecondPlayer.DrawShadow(screen)
 	g.SecondPlayer.Draw(screen)
-
-	// for _, m := range g.meteors {
-	// 	m.Draw(screen)
-	// }
 
 	for _, b := range g.player.bullet {
 		b.Draw(screen)
@@ -278,9 +241,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprintf("%06d", g.player.score), assets.ScoreFont, 3*screenWidth/4, 50, color.RGBA{128, 128, 128, 255})
 }
 
-//	func (g *Game) AddBullet(b *Bullet) {
-//		g.bullets = append(g.bullets, b)
-//	}
 func (g *Game) AddBulletPlayer(b *utils.Bullet) {
 	g.player.bullet = append(g.player.bullet, b)
 }
@@ -288,9 +248,6 @@ func (g *Game) AddBulletSecondPlayer(b *utils.Bullet) {
 	g.SecondPlayer.bullet = append(g.SecondPlayer.bullet, b)
 }
 
-//	func (g *Game) AddBulletSP(b *Bullet) {
-//		g.SecondPlayer.bullet = append(g.SecondPlayer.bullet, b)
-//	}
 func (g *Game) Reset() {
 	g.player = NewPlayer(g)
 	g.SecondPlayer = NewSecondPlayer(g)
@@ -301,7 +258,6 @@ func (g *Game) Reset() {
 	g.Explosion = nil
 	g.bullets = nil
 	g.score = 0
-	// g.meteorSpawnTimer.Reset()
 	g.baseVelocity = baseMeteorVelocity
 	g.velocityTimer.Reset()
 }

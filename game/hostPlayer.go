@@ -13,19 +13,17 @@ import (
 const (
 	shootCooldown     = time.Millisecond * 400
 	rotationPerSecond = 1.1 * math.Pi
-
 	bulletSpawnOffset = 1.0
 	sprintSpeed       = 4
 )
 
 type Player struct {
-	game     *Game
-	score    int
-	position utils.Vector
-	rotation float64
-	sprite   []*ebiten.Image
-	bullet   []*utils.Bullet
-
+	game                *Game
+	score               int
+	position            utils.Vector
+	rotation            float64
+	sprite              []*ebiten.Image
+	bullet              []*utils.Bullet
 	animationSpeed      float64
 	animationTimer      float64
 	playerFramePosition int
@@ -34,11 +32,9 @@ type Player struct {
 
 func NewPlayer(game *Game) *Player {
 	sprite := assets.PlanePlayer
-
 	bounds := sprite[1].Bounds()
 	halfW := float64(bounds.Dx()) / 2
 	halfH := float64(bounds.Dy()) / 2
-
 	pos := utils.Vector{
 		X: 4 * halfW,
 		Y: screenHeight/2 - halfH,
