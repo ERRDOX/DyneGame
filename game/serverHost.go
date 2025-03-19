@@ -83,10 +83,10 @@ func (g *Game) respHostPosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	for {
-		time.Sleep(120 * time.Millisecond)
-		fmt.Printf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)
+		time.Sleep(5 * time.Millisecond)
+		// fmt.Printf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", g.player.position.X, g.player.position.Y, g.player.rotation)))
-		fmt.Println("Received: ")
+		// fmt.Println("Received: ")
 
 	}
 }
@@ -97,10 +97,10 @@ func (g *Game) respClientPosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	for {
-		time.Sleep(120 * time.Millisecond)
-		fmt.Printf("%f,%f,%f", g.SecondPlayer.position.X, g.SecondPlayer.position.Y, g.SecondPlayer.rotation)
+		time.Sleep(5 * time.Millisecond)
+		// fmt.Printf("%f,%f,%f", g.SecondPlayer.position.X, g.SecondPlayer.position.Y, g.SecondPlayer.rotation)
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", g.SecondPlayer.position.X, g.SecondPlayer.position.Y, g.SecondPlayer.rotation)))
-		fmt.Println("Received: ")
+		// fmt.Println("Received: ")
 
 	}
 }
@@ -112,13 +112,13 @@ func (g *Game) respClientBulletHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	for {
-		time.Sleep(120 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 		if len(g.SecondPlayer.bullet) == 0 {
 			continue
 		}
 		for _, b := range g.player.bullet {
 			ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", b.Position.X, b.Position.Y, b.Rotation)))
-			fmt.Printf("Sent: %f, %f, %f\n", b.Position.X, b.Position.Y, b.Rotation)
+			// fmt.Printf("Sent: %f, %f, %f\n", b.Position.X, b.Position.Y, b.Rotation)
 		}
 		if err != nil {
 			log.Printf("Error marshalling bullet data: %v\n", err)
@@ -134,13 +134,13 @@ func (g *Game) respHostBulletHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	for {
-		time.Sleep(120 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 		if len(g.player.bullet) == 0 {
 			continue
 		}
 		for _, b := range g.player.bullet {
 			ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%f,%f,%f", b.Position.X, b.Position.Y, b.Rotation)))
-			fmt.Printf("Sent: %f, %f, %f\n", b.Position.X, b.Position.Y, b.Rotation)
+			// fmt.Printf("Sent: %f, %f, %f\n", b.Position.X, b.Position.Y, b.Rotation)
 		}
 		if err != nil {
 			log.Printf("Error marshalling bullet data: %v\n", err)
@@ -179,7 +179,7 @@ func (a *Action) serverHandlClientAction(w http.ResponseWriter, r *http.Request)
 			a.RemoveAct(string(data[2:]))
 		}
 		if err := ws.WriteMessage(websocket.TextMessage, data); err != nil {
-			log.Println("write:", err)
+			// log.Println("write:", err)
 			break
 		}
 	}
@@ -195,25 +195,8 @@ func (a *Action) GetMap() string {
 	conn.WriteMessage(websocket.TextMessage, []byte("map"))
 	_, message, err := conn.ReadMessage()
 	if err != nil {
-		log.Println("read:", err)
+		// log.Println("read:", err)
 		return ""
 	}
 	return string(message)
 }
-
-//call server to get the server player act and location of both players
-
-// func (a *Action) GetActLoc() map[string]bool {
-// 	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8080/ws", nil)
-// 	if err != nil {
-// 		log.Fatal("dial:", err)
-// 	}
-// 	defer conn.Close()
-// 	conn.WriteMessage(websocket.TextMessage, []byte("pos"))
-// 	_, message, err := conn.ReadMessage()
-// 	if err != nil {
-// 		log.Println("read:", err)
-// 		return nil
-// 	}
-// 	return a.GetAct()
-// }
