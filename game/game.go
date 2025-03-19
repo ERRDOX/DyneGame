@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -25,11 +26,11 @@ const (
 	screenHeight = 900
 	// screenWidth     = 800
 	// screenHeight    = 600
-	meteorSpawnTime = 1 * time.Second
+	// meteorSpawnTime = 1 * time.Second
 
-	baseMeteorVelocity  = 0.25
-	meteorSpeedUpAmount = 0.01
-	meteorSpeedUpTime   = 5 * time.Second
+	// baseMeteorVelocity  = 0.25
+	// meteorSpeedUpAmount = 0.01
+	// meteorSpeedUpTime   = 5 * time.Second
 	//   1 >=BoundsDecreaseRatio> 0
 	humanBoundsDecreaseRatio  = 1.0
 	objectBoundsDecreaseRatio = 1.0
@@ -38,40 +39,40 @@ const (
 )
 
 type Game struct {
-	player           *Player
-	SecondPlayer     *SecondPlayer
-	Action           *Action
-	meteorSpawnTimer *utils.Timer
-	Explosion        []*utils.Explosion
-	obstacle         []*utils.Obstacle
-	meteors          []*Meteor
-	bullets          []*utils.Bullet
-	score            int
-	baseVelocity     float64
-	velocityTimer    *utils.Timer
+	player       *Player
+	SecondPlayer *SecondPlayer
+	Action       *Action
+	Explosion    []*utils.Explosion
+	obstacle     []*utils.Obstacle
+	// meteors      []*Meteor
+	bullets []*utils.Bullet
+	score   int
+	// baseVelocity float64
+	// velocityTimer *utils.Timer
 }
 
 func NewGameClient() *Game {
-	g := &Game{
-		meteorSpawnTimer: utils.NewTimer(meteorSpawnTime),
-		baseVelocity:     baseMeteorVelocity,
-		velocityTimer:    utils.NewTimer(meteorSpeedUpTime),
-	}
+	g := &Game{}
 
 	g.obstacle = append(g.obstacle, utils.NewMaptoObstacle(utils.DragonMap)...)
 	g.Action = NewAction()
 	g.SecondPlayer = NewSecondPlayer(g)
 	g.player = NewPlayer(g)
+
+	// Initialize client connection
+	clientConn := NewClientConnection(g)
+	if err := clientConn.Connect(); err != nil {
+		log.Printf("Failed to connect to host: %v", err)
+	}
+
+	// Start sending client actions to server
 	go SendClientActionToServer()
+
 	return g
 }
 
 func NewGameHost() *Game {
-	g := &Game{
-		meteorSpawnTimer: utils.NewTimer(meteorSpawnTime),
-		baseVelocity:     baseMeteorVelocity,
-		velocityTimer:    utils.NewTimer(meteorSpeedUpTime),
-	}
+	g := &Game{}
 
 	g.obstacle = append(g.obstacle, utils.NewMaptoObstacle(utils.DragonMap)...)
 	g.Action = NewAction()
@@ -83,11 +84,11 @@ func NewGameHost() *Game {
 }
 
 func (g *Game) Update() error {
-	g.velocityTimer.Update()
-	if g.velocityTimer.IsReady() {
-		g.velocityTimer.Reset()
-		g.baseVelocity += meteorSpeedUpAmount
-	}
+	// g.velocityTimer.Update()
+	// if g.velocityTimer.IsReady() {
+	// 	g.velocityTimer.Reset()
+	// 	g.baseVelocity += meteorSpeedUpAmount
+	// }
 
 	g.Explosion = nil
 	g.SecondPlayer.Update(g)
@@ -240,14 +241,14 @@ func (g *Game) Reset() {
 	g.player = NewPlayer(g)
 	g.SecondPlayer = NewSecondPlayer(g)
 	g.Action.Act = make(map[string]bool)
-	g.meteors = nil
+	// g.meteors = nil
 	g.player.bullet = nil
 	g.SecondPlayer.bullet = nil
 	g.Explosion = nil
 	g.bullets = nil
 	g.score = 0
-	g.baseVelocity = baseMeteorVelocity
-	g.velocityTimer.Reset()
+	// g.baseVelocity = baseMeteorVelocity
+	// g.velocityTimer.Reset()
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
